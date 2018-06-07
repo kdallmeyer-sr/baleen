@@ -1,0 +1,42 @@
+buildscript {
+    ext.kotlin_version = '1.2.41'
+
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies { 
+        classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
+        classpath 'org.junit.platform:junit-platform-gradle-plugin:1.0.0'
+    }
+}
+
+plugins {
+    id 'com.github.johnrengelman.shadow' version '2.0.2'
+    id "com.jfrog.artifactory" version "4.5.4"
+    id 'org.jetbrains.kotlin.jvm' version '1.2.30'
+    id 'org.jmailen.kotlinter' version '1.7.0'
+    id 'nebula.dependency-lock' version '5.0.4'
+}
+
+apply plugin: 'idea'
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+subprojects {
+    apply plugin: 'maven-publish'
+    apply plugin: 'nebula.dependency-lock'
+
+    task sourceJar(type: Jar) {
+        from sourceSets.main.allSource
+        classifier = 'sources'
+    }
+
+    configurations {
+        published
+    }
+}

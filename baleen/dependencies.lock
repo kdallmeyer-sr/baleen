@@ -1,0 +1,178 @@
+{
+    "compile": {
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "compileClasspath": {
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "default": {
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "junitPlatform": {
+        "org.junit.platform:junit-platform-console": {
+            "locked": "1.0.0",
+            "requested": "1.0.0"
+        },
+        "org.junit.platform:junit-platform-launcher": {
+            "locked": "1.0.0",
+            "requested": "1.0.0"
+        }
+    },
+    "kapt": {
+        "org.jetbrains.kotlin:kotlin-annotation-processing-gradle": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "kaptTest": {
+        "org.jetbrains.kotlin:kotlin-annotation-processing-gradle": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "runtime": {
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "runtimeClasspath": {
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        }
+    },
+    "testCompile": {
+        "org.assertj:assertj-core": {
+            "locked": "3.9.1",
+            "requested": "3.9.1"
+        },
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-test": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.junit.jupiter:junit-jupiter-api": {
+            "locked": "5.0.1",
+            "requested": "5.0.1"
+        }
+    },
+    "testCompileClasspath": {
+        "org.assertj:assertj-core": {
+            "locked": "3.9.1",
+            "requested": "3.9.1"
+        },
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-test": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.junit.jupiter:junit-jupiter-api": {
+            "locked": "5.0.1",
+            "requested": "5.0.1"
+        }
+    },
+    "testRuntime": {
+        "org.assertj:assertj-core": {
+            "locked": "3.9.1",
+            "requested": "3.9.1"
+        },
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-test": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.junit.jupiter:junit-jupiter-api": {
+            "locked": "5.0.1",
+            "requested": "5.0.1"
+        },
+        "org.junit.jupiter:junit-jupiter-engine": {
+            "locked": "5.0.1",
+            "requested": "5.0.1"
+        },
+        "org.junit.platform:junit-platform-runner": {
+            "locked": "1.1.0",
+            "requested": "1.1.0"
+        }
+    },
+    "testRuntimeClasspath": {
+        "org.assertj:assertj-core": {
+            "locked": "3.9.1",
+            "requested": "3.9.1"
+        },
+        "org.jetbrains.kotlin:kotlin-reflect": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-stdlib": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.jetbrains.kotlin:kotlin-test": {
+            "locked": "1.2.21",
+            "requested": "1.2.21"
+        },
+        "org.junit.jupiter:junit-jupiter-api": {
+            "locked": "5.0.1",
+            "requested": "5.0.1"
+        },
+        "org.junit.jupiter:junit-jupiter-engine": {
+            "locked": "5.0.1",
+            "requested": "5.0.1"
+        },
+        "org.junit.platform:junit-platform-runner": {
+            "locked": "1.1.0",
+            "requested": "1.1.0"
+        }
+    }
+}
