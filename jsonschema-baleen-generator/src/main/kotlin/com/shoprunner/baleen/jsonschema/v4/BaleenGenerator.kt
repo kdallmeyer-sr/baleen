@@ -69,11 +69,16 @@ object BaleenGenerator {
     }
 
     fun processSchema(namespace: String, name: String, schema: ObjectSchema): PropertySpec {
-        val attrsCodeBlock = schema.properties.map { (k, v) ->
+        val properties = schema.properties ?: emptyMap()
+        val attrsCodeBlock = properties.map { (k, v) ->
             processField(k, v, schema.required?.contains(k) ?: false)
         }
                 .fold(CodeBlock.builder(), { b, c -> b.add(c).add("\n") })
                 .build()
+
+        val patternProperties = schema.patternProperties ?: emptyMap()
+        val patternTests = patternProperties.map { (k, v) -> processPatternFieldTest(k, v) }
+                .fold(CodeBlock.builder(), { b, c -> b.add(c).add("\n") }).build()
 
         val modelCodeBlock = CodeBlock.builder()
                 .beginControlFlow("%L(%S, %S, %S)",
@@ -82,6 +87,8 @@ object BaleenGenerator {
                         namespace,
                         schema.description ?: "")
                 .add(attrsCodeBlock)
+                .add("\n")
+                .add(patternTests)
                 .add("\n")
                 .endControlFlow()
                 .build()
@@ -132,6 +139,36 @@ object BaleenGenerator {
             }
             unindent()
             add(")")
+        }.build()
+    }
+
+    fun processPatternFieldTest(regex: String, schema: JsonSchema): CodeBlock {
+        /*
+        it.test { dataTrace, data ->
+            val patternType = LongType()
+            sequenceOf(data.keys).flatten()
+                    .filter{ k -> k.matches(Regex("^num_"))}
+                    .flatMap{ k -> patternType.validate(dataTrace, data[k]) }
+        }
+         */
+        return CodeBlock.builder().apply {
+            // add comment
+            add("// Test for pattern property %S\n", regex)
+            // create attribute
+            add("it.%L{ dataTrace, data ->\n", DataDescription::test.name)
+            indent()
+            // get the type to check against
+            add("val patternType = ")
+            add(jsonSchemaToBaleenType(schema))
+            add("\n")
+            // iterate over keys
+            add("sequenceOf(data.keys).flatten()\n")
+            indent()
+            add(".filter{ k -> k.matches(Regex(%S))}\n", regex)
+            add(".flatMap{ k -> patternType.validate(dataTrace, data[k]) }\n")
+            unindent()
+            unindent()
+            add("}")
         }.build()
     }
 

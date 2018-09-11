@@ -1392,6 +1392,74 @@ internal class BaleenGeneratorTest {
             Assertions.assertThat(dogOutputStr).isEqualToIgnoringWhitespace(dogDescriptionStr)
             Assertions.assertThat(packOutputStr).isEqualToIgnoringWhitespace(packDescriptionStr)
         }
+
+        @Test
+        fun `models with pattern properties add additional tests to Baleen `() {
+            val schemaStr = """
+            {
+              "id" : "com.shoprunner.data.dogs.Dog",
+              "definitions" : {
+                "record:com.shoprunner.data.dogs.Dog" : {
+                  "description" : "It's a dog. Ruff Ruff!",
+                  "type" : "object",
+                  "required" : [ "name" ],
+                  "additionalProperties" : false,
+                  "properties" : {
+                    "name" : {
+                      "description" : "The name of the dog",
+                      "type" : "string",
+                      "maxLength" : 2147483647,
+                      "minLength" : 0
+                    }
+                  },
+                  "patternProperties" : {
+                    "^num_" : {
+                      "type" : "integer"
+                    }
+                  }
+                }
+              },
+              "${'$'}ref" : "#/definitions/record:com.shoprunner.data.dogs.Dog",
+              "${'$'}schema" : "http://json-schema.org/draft-04/schema"
+            }
+            """.trimIndent()
+
+            val dogDescriptionStr = """
+                package com.shoprunner.data.dogs
+
+                import com.shoprunner.baleen.Baleen.describe
+                import com.shoprunner.baleen.DataDescription
+                import com.shoprunner.baleen.types.LongType
+                import com.shoprunner.baleen.types.StringType
+
+                /**
+                 * It's a dog. Ruff Ruff! */
+                val Dog: DataDescription = describe("Dog", "com.shoprunner.data.dogs", "It's a dog. Ruff Ruff!") {
+                    it.attr(
+                            name = "name",
+                            type = StringType(),
+                            markdownDescription = "The name of the dog",
+                            required = true
+                    )
+
+                    // Test for pattern property "^num_"
+                    it.test { dataTrace, data ->
+                        val patternType = LongType()
+                        sequenceOf(data.keys).flatten()
+                                .filter{ k -> k.matches(Regex("^num_"))}
+                                .flatMap{ k -> patternType.validate(dataTrace, data[k]) }
+                    }
+                }
+            """.trimIndent()
+
+            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val dogOutputStream = StringWriter()
+            descriptions.first().writeTo(dogOutputStream)
+            val dogOutputStr = dogOutputStream.toString()
+
+            Assertions.assertThat(descriptions).hasSize(1)
+            Assertions.assertThat(dogOutputStr).isEqualToIgnoringWhitespace(dogDescriptionStr)
+        }
     }
 
     @Nested
@@ -1416,6 +1484,11 @@ internal class BaleenGeneratorTest {
                   "description" : "The number of legs a dog has",
                   "type" : "integer",
                   "default": 4
+                }
+              },
+              "patternProperties" : {
+                "^num_" : {
+                  "type" : "integer"
                 }
               }
             },

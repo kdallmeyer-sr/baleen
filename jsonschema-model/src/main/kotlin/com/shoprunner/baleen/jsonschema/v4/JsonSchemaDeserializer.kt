@@ -34,8 +34,10 @@ class JsonSchemaDeserializer : StdDeserializer<JsonSchema>(JsonSchema::class.jav
             "number" -> mapper.treeToValue(tree, NumberSchema::class.java)
             "null" -> mapper.treeToValue(tree, NullSchema::class.java)
             "object" -> {
+                val properties = tree["properties"]
+                val patternProperties = tree["patternProperties"]
                 val additionalProperties = tree["additionalProperties"]
-                if (additionalProperties == null || additionalProperties.isBoolean || additionalProperties.isNull) {
+                if (properties != null || patternProperties != null || (additionalProperties != null && (additionalProperties.isBoolean || additionalProperties.isNull))) {
                     mapper.treeToValue(tree, ObjectSchema::class.java)
                 } else {
                     mapper.treeToValue(tree, MapSchema::class.java)
