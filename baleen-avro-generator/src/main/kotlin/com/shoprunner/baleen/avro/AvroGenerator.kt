@@ -29,7 +29,10 @@ object AvroGenerator {
     fun getAvroSchema(baleenType: BaleenType): Schema {
         return when (baleenType) {
             is DataDescription -> encode(baleenType)
-            is CoercibleType -> getAvroSchema(baleenType.type)
+            is CoercibleType -> Schema.createUnion(
+                getAvroSchema(baleenType.coercedToType),
+                getAvroSchema(baleenType.coercedFromType)
+            )
             is BooleanType -> Schema.create(Schema.Type.BOOLEAN)
             is FloatType -> Schema.create(Schema.Type.FLOAT)
             is DoubleType -> Schema.create(Schema.Type.DOUBLE)

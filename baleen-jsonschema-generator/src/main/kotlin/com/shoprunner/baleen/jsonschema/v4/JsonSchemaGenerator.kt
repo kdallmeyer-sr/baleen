@@ -66,7 +66,15 @@ object JsonSchemaGenerator {
                 }
             }
             is BooleanType -> BooleanSchema to objectContext
-            is CoercibleType -> getJsonSchema(baleenType.type, objectContext, withAdditionalAttributes)
+            is CoercibleType -> {
+                val (toJsonSchema, toContext) = getJsonSchema(baleenType.coercedToType, objectContext, withAdditionalAttributes)
+                val (fromJsonSchema, fromContext) = getJsonSchema(baleenType.coercedFromType, objectContext, withAdditionalAttributes)
+                val subContext = toContext + fromContext
+                OneOf(listOf(
+                    toJsonSchema,
+                    fromJsonSchema
+                )) to subContext
+            }
             is DoubleType -> NumberSchema(
                     maximum = if (baleenType.max.isFinite()) baleenType.max else null,
                     minimum = if (baleenType.min.isFinite()) baleenType.min else null
@@ -116,7 +124,7 @@ object JsonSchemaGenerator {
                     OneOf(subSchemas) to subContext
                 }
             }
-            else -> throw Exception("Unknown type: " + baleenType::class.simpleName)
+            else -> throw Exception("Unknown coercedToType: " + baleenType::class.simpleName)
         }
     }
 

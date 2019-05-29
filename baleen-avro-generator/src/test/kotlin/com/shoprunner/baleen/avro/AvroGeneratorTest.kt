@@ -43,16 +43,20 @@ class AvroGeneratorTest {
         @Test
         fun `getAvroSchema encodes the resulting coerced type`() {
             val schema = AvroGenerator.getAvroSchema(StringCoercibleToFloat(FloatType()))
-            assertThat(schema.type).isEqualTo(Schema.Type.FLOAT)
+            assertThat(schema.type).isEqualTo(Schema.Type.UNION)
+            assertThat(schema.types.size).isEqualTo(2)
+            assertThat(schema.types[0].type).isEqualTo(Schema.Type.FLOAT)
+            assertThat(schema.types[1].type).isEqualTo(Schema.Type.STRING)
         }
 
         @Test
         fun `getAvroSchema encodes the resulting nullable coerced type`() {
             val schema = AvroGenerator.getAvroSchema(AllowsNull(StringCoercibleToFloat(FloatType())))
             assertThat(schema.type).isEqualTo(Schema.Type.UNION)
-            assertThat(schema.types.size).isEqualTo(2)
+            assertThat(schema.types.size).isEqualTo(3)
             assertThat(schema.types[0].type).isEqualTo(Schema.Type.NULL)
             assertThat(schema.types[1].type).isEqualTo(Schema.Type.FLOAT)
+            assertThat(schema.types[2].type).isEqualTo(Schema.Type.STRING)
         }
 
         @Test
@@ -516,7 +520,7 @@ class AvroGeneratorTest {
             |   "doc": "It's a dog. Ruff Ruff!",
             |   "fields": [
             |        { "name": "name", "type": "string", "doc": "The name of the dog" },
-            |        { "name": "legs", "type": [ "null", "long" ], "doc": "The number of legs", "default": null }
+            |        { "name": "legs", "type": [ "null", "long", "string" ], "doc": "The number of legs", "default": null }
             |   ]
             |}
             """.trimMargin()
@@ -557,7 +561,7 @@ class AvroGeneratorTest {
             |          "name" : "doctor_visits",
             |          "type" : [
             |            "null",
-            |            { "type" : "map", "values" : { "type" : "long", "logicalType" : "timestamp-millis" } }
+            |            { "type" : "map", "values" : [ { "type" : "long", "logicalType" : "timestamp-millis" }, "string" ] }
             |           ],
             |           "doc" : "Visits to doctor. Name to visit time",
             |           "default" : null

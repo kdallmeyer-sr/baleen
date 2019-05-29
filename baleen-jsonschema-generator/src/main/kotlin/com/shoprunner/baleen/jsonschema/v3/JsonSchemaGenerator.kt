@@ -53,7 +53,16 @@ object JsonSchemaGenerator {
     fun getJsonSchema(baleenType: BaleenType): JsonSchema {
         return when (baleenType) {
             is DataDescription -> encodeDescription(baleenType)
-            is CoercibleType -> getJsonSchema(baleenType.type)
+            is CoercibleType -> {
+                val toJsonSchema = getJsonSchema(baleenType.coercedToType)
+                val fromJsonSchema = getJsonSchema(baleenType.coercedFromType)
+                UnionTypeSchema().apply {
+                    if (!toJsonSchema.isValueTypeSchema || !fromJsonSchema.isValueTypeSchema) {
+                        throw Exception("Union types only accept primitive types")
+                    }
+                    elements = arrayOf(toJsonSchema as ValueTypeSchema, fromJsonSchema as ValueTypeSchema)
+                }
+            }
             is BooleanType -> BooleanSchema()
             is FloatType -> NumberSchema().apply {
                 maximum = baleenType.max.toDouble()
@@ -112,7 +121,7 @@ object JsonSchemaGenerator {
             }
         // V3 Does not support
             is AllowsNull<*> -> getJsonSchema(baleenType.type)
-            else -> throw Exception("Unknown type: " + baleenType::class.simpleName)
+            else -> throw Exception("Unknown coercedToType: " + baleenType::class.simpleName)
         }
     }
 

@@ -42,13 +42,18 @@ internal class JsonSchemaGeneratorTest {
         @Test
         fun `getJsonSchema encodes the resulting coerced type`() {
             val schema = JsonSchemaGenerator.getJsonSchema(StringCoercibleToFloat(FloatType()))
-            Assertions.assertThat(schema.isNumberSchema).isTrue()
+            Assertions.assertThat(schema.isUnionTypeSchema).isTrue()
+            Assertions.assertThat((schema as UnionTypeSchema).elements).hasSize(2)
+            Assertions.assertThat(schema.elements[0].isNumberSchema).isTrue()
+            Assertions.assertThat(schema.elements[1].isStringSchema).isTrue()
         }
 
         @Test
         fun `getJsonSchema encodes the resulting coerced type and ignores AllowsNull`() {
             val schema = JsonSchemaGenerator.getJsonSchema(AllowsNull(StringCoercibleToFloat(FloatType())))
-            Assertions.assertThat(schema.isNumberSchema).isTrue()
+            Assertions.assertThat((schema as UnionTypeSchema).elements).hasSize(2)
+            Assertions.assertThat(schema.elements[0].isNumberSchema).isTrue()
+            Assertions.assertThat(schema.elements[1].isStringSchema).isTrue()
         }
 
         @Test

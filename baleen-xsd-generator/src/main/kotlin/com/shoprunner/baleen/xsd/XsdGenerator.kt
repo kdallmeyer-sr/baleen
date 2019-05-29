@@ -93,7 +93,7 @@ object XsdGenerator {
                                     minInclusive = MinInclusive(baleenType.min.toBigDecimal()))
                             ))
             is OccurrencesType -> defaultTypeMapper(baleenType.memberType).copy(maxOccurs = "unbounded")
-            is CoercibleType -> defaultTypeMapper(baleenType.type)
+            is CoercibleType -> defaultTypeMapper(baleenType.coercedToType)
             is StringType -> TypeDetails(
                                 simpleType = SimpleType(
                                         Restriction(

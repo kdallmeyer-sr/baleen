@@ -51,7 +51,16 @@ internal class JsonSchemaGeneratorTest {
                   "additionalProperties": false,
                   "properties" : {
                     "number" : {
-                      "type" : "number"
+                      "oneOf" : [
+                        {
+                          "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "maxLength": 2147483647,
+                          "minLength": 0
+                        }
+                      ]
                     }
                   }
                 }
@@ -90,6 +99,11 @@ internal class JsonSchemaGeneratorTest {
                         },
                         {
                           "type": "number"
+                        },
+                        {
+                          "type": "string",
+                          "maxLength" : 2147483647,
+                          "minLength" : 0
                         }
                       ]
                     }
