@@ -5,19 +5,15 @@ import com.shoprunner.baleen.DataTrace
 import com.shoprunner.baleen.ValidationError
 import com.shoprunner.baleen.ValidationInfo
 import com.shoprunner.baleen.ValidationResult
+import java.math.BigDecimal
 
-class FloatType(val min: Float = Float.NEGATIVE_INFINITY, val max: Float = Float.POSITIVE_INFINITY) : BaleenType {
+class FloatType(min: Float = Float.NEGATIVE_INFINITY, max: Float = Float.POSITIVE_INFINITY) : NumericType(min, max) {
     override fun name() = "float"
 
-    override fun validate(dataTrace: DataTrace, value: Any?): Sequence<ValidationResult> =
-            when {
-                value == null -> sequenceOf(ValidationError(dataTrace, "is null", value))
-                value !is Float && value is Number && value.toDouble() >= -Float.MAX_VALUE && value.toDouble() <= Float.MAX_VALUE ->
-                    sequenceOf(ValidationInfo(dataTrace, "is coerced to float from ${value::class.java.simpleName}", value)) +
-                            validate(dataTrace, value.toFloat())
-                value !is Float -> sequenceOf(ValidationError(dataTrace, "is not a float", value))
-                value < min -> sequenceOf(ValidationError(dataTrace, "is less than $min", value))
-                value > max -> sequenceOf(ValidationError(dataTrace, "is greater than $max", value))
-                else -> emptySequence()
-            }
+    override fun isInRange(value: Number): Boolean {
+        val decimal = BigDecimal(value.toString())
+        val isInfinite = value == Float.NEGATIVE_INFINITY || value == Float.POSITIVE_INFINITY
+        val isInRange = decimal >= -Float.MAX_VALUE.toBigDecimal() && decimal <= Float.MAX_VALUE.toBigDecimal()
+        return isInfinite || isInRange
+    }
 }

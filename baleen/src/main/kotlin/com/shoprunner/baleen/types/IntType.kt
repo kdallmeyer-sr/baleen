@@ -6,7 +6,7 @@ import com.shoprunner.baleen.ValidationError
 import com.shoprunner.baleen.ValidationInfo
 import com.shoprunner.baleen.ValidationResult
 
-class IntType(val min: Int = Int.MIN_VALUE, val max: Int = Int.MAX_VALUE) : BaleenType {
+class IntType(min: Int = Int.MIN_VALUE, max: Int = Int.MAX_VALUE) : NumericType(min, max) {
     override fun name() = "int"
 
     override fun validate(dataTrace: DataTrace, value: Any?): Sequence<ValidationResult> =
