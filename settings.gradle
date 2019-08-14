@@ -6,6 +6,8 @@ include 'baleen-jsonschema-generator'
 include 'jsonschema-baleen-generator'
 include 'baleen-xml'
 include 'baleen-xsd-generator'
+include 'baleen-kotlin:baleen-kotlin'
+include 'baleen-kotlin:baleen-kotlin-kapt'
 include 'baleen-v2:baleen-v2'
 include 'baleen-v2:baleen-v2-tests'
 
