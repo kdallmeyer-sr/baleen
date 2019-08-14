@@ -1,3 +1,5 @@
+apply plugin: 'kotlin-kapt'
+
 dependencies {
     api project(':baleen')
     api project(':baleen-csv')
@@ -6,8 +8,13 @@ dependencies {
     api project(':jsonschema-baleen-generator')
     api project(':baleen-jsonschema-generator')
     api project(':baleen-avro-generator')
+    api project(':baleen-kotlin:baleen-kotlin')
     api "org.apache.avro:avro:1.9.0"
+    api 'javax.validation:validation-api:2.0.0.Final'
     implementation 'org.jetbrains.kotlin:kotlin-reflect'
+
+    kapt project(':baleen-kotlin:baleen-kotlin-kapt')
+    kaptTest project(':baleen-kotlin:baleen-kotlin-kapt')
 
     // For Json schema validation tests
     testImplementation 'com.github.everit-org.json-schema:org.everit.json.schema:1.11.1'
@@ -20,9 +27,21 @@ repositories {
     maven { url "https://jitpack.io" }
 }
 
+kapt {
+    generateStubs = true
+}
+
+
 test {
     ignoreFailures = true
 }
+
+//idea {
+//    module {
+//        sourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+//        generatedSourceDirs += files('build/generated/source/kapt/main', 'build/generated/source/kaptKotlin/main')
+//    }
+//}
 
 if (!project.hasProperty("version2")) {
     project.tasks.each {

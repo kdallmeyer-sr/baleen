@@ -2,9 +2,18 @@ package com.shoprunner.baleen.version2
 
 import com.shoprunner.baleen.Baleen.describeAs
 import com.shoprunner.baleen.ValidationAssert.Companion.assertThat
+import com.shoprunner.baleen.kotlin.validate
 import com.shoprunner.baleen.types.AllowsNull
 import com.shoprunner.baleen.types.IntType
 import com.shoprunner.baleen.types.StringType
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
+import java.io.File
+import javax.xml.XMLConstants
+import javax.xml.transform.stream.StreamSource
+import javax.xml.validation.SchemaFactory
+import kotlin.reflect.full.memberProperties
+import kotlin.reflect.full.primaryConstructor
 import org.apache.avro.generic.GenericDatumReader
 import org.apache.avro.generic.GenericDatumWriter
 import org.apache.avro.generic.GenericRecord
@@ -17,14 +26,6 @@ import org.json.JSONObject
 import org.json.JSONTokener
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import java.io.File
-import javax.xml.XMLConstants
-import javax.xml.transform.stream.StreamSource
-import javax.xml.validation.SchemaFactory
-import kotlin.reflect.full.memberProperties
-import kotlin.reflect.full.primaryConstructor
 
 /**
  * Given a Baleen schema, create external schema (Avro, XSD, Json-Schema, Kotlin data class) and
@@ -145,14 +146,14 @@ class UseCase4Test {
             val instance = dataClass.primaryConstructor?.call("Fido", 4)
             assertThat(instance).isNotNull()
 
-            assertThat(instance.validate(schema)).isValid()
+            assertThat(instance!!.validate()).isValid()
         }
 
         @Test
         fun `create an data class instance and validate it against the schema`() {
             val data = schema.toDataClassInstance("Fido", 4)
 
-            assertThat(data.validate(schema)).isValid()
+            assertThat(data.validate()).isValid()
         }
     }
 }

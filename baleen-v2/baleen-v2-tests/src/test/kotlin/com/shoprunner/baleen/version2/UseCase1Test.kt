@@ -2,10 +2,13 @@ package com.shoprunner.baleen.version2
 
 import com.shoprunner.baleen.Baleen.describeAs
 import com.shoprunner.baleen.ValidationAssert.Companion.assertThat
+import com.shoprunner.baleen.kotlin.validate
 import com.shoprunner.baleen.types.AllowsNull
 import com.shoprunner.baleen.types.IntType
 import com.shoprunner.baleen.types.OccurrencesType
 import com.shoprunner.baleen.types.StringType
+import java.io.ByteArrayInputStream
+import java.io.ByteArrayOutputStream
 import org.apache.avro.Schema
 import org.apache.avro.generic.GenericDatumWriter
 import org.apache.avro.generic.GenericRecord
@@ -13,15 +16,11 @@ import org.apache.avro.generic.GenericRecordBuilder
 import org.apache.avro.io.EncoderFactory
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 
 /**
  * Given we have the data, we define the schema manually and validate the data
  */
 class UseCase1Test {
-
-    data class Dog(var name: String, var numLegs: Int?)
 
     @Nested
     inner class `Start with the data and and manually define the schema` {
@@ -235,12 +234,12 @@ class UseCase1Test {
 
             @Test
             fun `the data can be validated`() {
-                assertThat(data.validate(schema)).isValid()
+                assertThat(data.validate()).isValid()
             }
 
             @Test
             fun `the data list can be validated`() {
-                assertThat(dataList.validate(schema)).isValid()
+                assertThat(dataList.validate()).isValid()
             }
         }
     }

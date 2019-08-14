@@ -1,7 +1,11 @@
 package com.shoprunner.baleen.version2
 
 import com.shoprunner.baleen.ValidationAssert.Companion.assertThat
+import com.shoprunner.baleen.kotlin.dataDescription
+import com.shoprunner.baleen.kotlin.validate
+import java.time.Instant
 import org.apache.avro.generic.GenericRecordBuilder
+import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 
@@ -9,7 +13,6 @@ import org.junit.jupiter.api.Test
  * Given a external schema (Avro, XSD, Json-Schema, Kotlin data class), build Baleen schema and validate the data
  */
 class UseCase3Test {
-    data class Dog(var name: String, var numLegs: Int?)
 
     @Nested
     inner class `Given an external` {
@@ -133,8 +136,22 @@ class UseCase3Test {
 
             @Test
             fun `then generate Baleen schema and validate the data`() {
-                val schema = Dog::class.learnSchema()
-                assertThat(data.validate(schema)).isValid()
+                assertThat(data.dataDescription()).isNotNull()
+                assertThat(data.validate()).isValid()
+            }
+
+            @Test
+            fun `for nested then generate Baleen schema and validate the data`() {
+                val pack = Pack(
+                    name = "WolfPack",
+                    creationDate = Instant.now(),
+                    leadDog = data,
+                    dogArray = arrayOf(data),
+                    dogList = listOf(data)
+                )
+
+                assertThat(pack.dataDescription()).isNotNull()
+                assertThat(pack.validate()).isValid()
             }
         }
     }

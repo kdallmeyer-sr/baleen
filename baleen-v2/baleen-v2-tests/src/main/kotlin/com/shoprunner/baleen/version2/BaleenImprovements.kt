@@ -9,30 +9,22 @@ import com.shoprunner.baleen.avro.AvroGenerator.encode as encodeAvroSchema
 import com.shoprunner.baleen.csv.FlowableUtil
 import com.shoprunner.baleen.dataTrace
 import com.shoprunner.baleen.datawrappers.HashData
+import com.shoprunner.baleen.jsonschema.v4.BaleenGenerator.parseJsonSchema
+import com.shoprunner.baleen.jsonschema.v4.JsonSchema
 import com.shoprunner.baleen.jsonschema.v4.JsonSchemaGenerator.encode as encodeJsonSchema
 import com.shoprunner.baleen.jsonschema.v4.JsonSchemaGenerator.writeTo as writeJsonSchemaTo
-import com.shoprunner.baleen.jsonschema.v4.JsonSchema
 import com.shoprunner.baleen.xml.XmlUtil
+import com.shoprunner.baleen.xsd.XsdGenerator.encode as encodeXsd
+import com.shoprunner.baleen.xsd.xml.Schema as XSD
+import java.io.ByteArrayOutputStream
+import java.io.InputStream
+import java.io.PrintStream
+import kotlin.reflect.KClass
+import kotlin.reflect.full.primaryConstructor
 import org.apache.avro.Schema as AvroSchema
 import org.apache.avro.generic.GenericRecord
-import java.io.InputStream
-import kotlin.reflect.KClass
-import com.shoprunner.baleen.xsd.xml.Schema as XSD
-import com.shoprunner.baleen.jsonschema.v4.BaleenGenerator.parseJsonSchema
-import com.shoprunner.baleen.xsd.XsdGenerator.encode as encodeXsd
-import java.io.ByteArrayOutputStream
-import java.io.PrintStream
-import kotlin.reflect.full.primaryConstructor
 
 // API Improvements, that we may want to add to the Baleen API
-
-fun <T : Any> KClass<T>.learnSchema(): DataDescription {
-    throw NotImplementedError()
-}
-
-fun <T : Any> T.learnSchema(): DataDescription {
-    return this::class.learnSchema()
-}
 
 fun Iterable<Map<String, Any?>>.learnSchema(): DataDescription {
     throw NotImplementedError()
@@ -123,10 +115,6 @@ class AvroData(val record: GenericRecord) : Data {
 
 fun GenericRecord.validate(schema: DataDescription, dataTrace: DataTrace = dataTrace()): Validation {
     return schema.validate(Context(AvroData(this), dataTrace))
-}
-
-fun <T> T.validate(schema: DataDescription, dataTrace: DataTrace = dataTrace()): Validation {
-    throw NotImplementedError()
 }
 
 fun String.asXSD(): XSD {
