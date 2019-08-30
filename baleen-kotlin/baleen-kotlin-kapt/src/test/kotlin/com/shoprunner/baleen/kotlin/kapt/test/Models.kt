@@ -1,6 +1,8 @@
 package com.shoprunner.baleen.kotlin.kapt.test
 
 import com.shoprunner.baleen.annotation.DataDescription
+import com.shoprunner.baleen.annotation.DefaultValue
+import com.shoprunner.baleen.annotation.DefaultValueType
 import java.math.BigDecimal
 import java.math.BigInteger
 import java.time.Instant
@@ -260,4 +262,40 @@ data class StringModelWithOverriddenName(
 
     /** A nullable string field **/
     var nullableString: String?
+)
+
+/** This model has defaults set */
+@DataDescription
+data class ModelWithDefaultValues(
+    @DefaultValue(DefaultValueType.Null)
+    var nullDefault: String? = null,
+
+    @DefaultValue(DefaultValueType.Boolean, defaultBooleanValue = true)
+    var booleanDefault: Boolean = true,
+
+    @DefaultValue(DefaultValueType.String, defaultStringValue = "default")
+    var stringDefault: String = "default",
+
+    @DefaultValue(DefaultValueType.Int, defaultIntValue = 100)
+    var intDefault: Int = 100,
+
+    @DefaultValue(DefaultValueType.Long, defaultLongValue = 100L)
+    var longDefault: Long = 100L,
+
+    @DefaultValue(DefaultValueType.Float, defaultFloatValue = 1.1f)
+    var floatDefault: Float = 1.1f,
+
+    @DefaultValue(DefaultValueType.Double, defaultDoubleValue = 1.1)
+    var doubleDefault: Double = 1.1,
+
+    @DefaultValue(DefaultValueType.DataClass, defaultDataClassValue = SubModelWithDefaults::class)
+    var classDefault: SubModelWithDefaults = SubModelWithDefaults(),
+
+    var noDefault: String?
+)
+
+@DataDescription
+data class SubModelWithDefaults(
+    @DefaultValue(DefaultValueType.String, defaultStringValue = "test")
+    val str: String = "test"
 )
