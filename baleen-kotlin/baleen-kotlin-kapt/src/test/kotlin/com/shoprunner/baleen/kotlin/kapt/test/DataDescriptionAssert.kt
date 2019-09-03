@@ -112,7 +112,7 @@ AbstractAssert<AttributeDescriptionAssert, AttributeDescription>(actual, Attribu
         when {
             actualValue is Array<*> && expectedDefaultValue is Array<*> -> {
                 if (actualValue.size != expectedDefaultValue.size ||
-                    (actualValue.isNotEmpty() && actualValue.zip(expectedDefaultValue).all { it.first == it.second })
+                    (actualValue.isNotEmpty() && actualValue.zip(expectedDefaultValue).any { it.first != it.second })
                 ) {
                     failWithMessage(
                         "Attribute ${actual.name} has a different default value. %s vs %s",
@@ -124,7 +124,7 @@ AbstractAssert<AttributeDescriptionAssert, AttributeDescription>(actual, Attribu
 
             actualValue is List<*> && expectedDefaultValue is List<*> -> {
                 if (actualValue.size != expectedDefaultValue.size ||
-                    (actualValue.isNotEmpty() && actualValue.zip(expectedDefaultValue).all { it.first == it.second })
+                    (actualValue.isNotEmpty() && actualValue.zip(expectedDefaultValue).any { it.first != it.second })
                 ) {
                     failWithMessage(
                         "Attribute ${actual.name} has a different default value. %s vs %s",
@@ -148,7 +148,7 @@ AbstractAssert<AttributeDescriptionAssert, AttributeDescription>(actual, Attribu
 
             actualValue is Map<*, *> && expectedDefaultValue is Map<*, *> -> {
                 if (actualValue.size != expectedDefaultValue.size ||
-                    (actualValue.isNotEmpty() && actualValue.all { (k, v) -> expectedDefaultValue[k] == v })
+                    (actualValue.isNotEmpty() && actualValue.any { (k, v) -> expectedDefaultValue[k] != v })
                 ) {
                     failWithMessage(
                         "Attribute ${actual.name} has a different default value. %s vs %s",
