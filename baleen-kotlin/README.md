@@ -5,7 +5,7 @@ Two Baleen annotations are given along with base extension methods.
 
 Data classes can also be used as source of truth for schemas, using Baleen as the bridge to other data formats such as 
 Avro, XSD, and json-schema. This can allow for modeling data in code and then using code generation tools to build schemas
-across multiple formats.  To support this effort, annotations are added for sefault value and aliases (TODO). 
+across multiple formats.  To support this effort, annotations are added for default value and aliases. 
 
 ## Setup
 
@@ -14,7 +14,7 @@ from the kapt implementation to keep dependencies as lightweight as possible.
 
 ```groovy
 plugins {
-    id "org.jetbrains.kotlin.kapt" version "1.3.41
+    id "org.jetbrains.kotlin.kapt" version "1.3.41"
 }
 
 dependencies {
@@ -119,11 +119,17 @@ data class ModelWithDefaultValues(
     @DefaultValue(DefaultValueType.Long, defaultLongValue = 100L)
     var longDefault: Long = 100L,
 
+    @DefaultValue(DefaultValueType.BigInteger, defaultStringValue = "100")
+    var bigIntDefault: BigInteger = 100L.toBigInteger(),
+
     @DefaultValue(DefaultValueType.Float, defaultFloatValue = 1.1f)
     var floatDefault: Float = 1.1f,
 
     @DefaultValue(DefaultValueType.Double, defaultDoubleValue = 1.1)
     var doubleDefault: Double = 1.1,
+
+    @DefaultValue(DefaultValueType.BigDecimal, defaultStringValue = "100.01")
+    var bigDecimalDefault: BigDecimal = 100.01.toBigDecimal(),
 
     @DefaultValue(DefaultValueType.DataClass, defaultDataClassValue = SubModelWithDefaults::class)
     var classDefault: SubModelWithDefaults = SubModelWithDefaults(),
@@ -269,6 +275,4 @@ dog.validate(externalDogType, dataTrace("External Source"))
   * Kotlinx Serialization
   * Jackson JSON annotations
   * Java's XML annotations
-* Support for using data classes as source of truth for schema. Missing capablities:
-    * Aliases 
 * Support for Java classes (should be straightforward to add)
