@@ -4,7 +4,8 @@ import com.shoprunner.baleen.AttributeDescription
 import com.shoprunner.baleen.BaleenType
 import com.shoprunner.baleen.DataDescription
 import com.shoprunner.baleen.NoDefault
-import com.shoprunner.baleen.annotation.Alias
+import com.shoprunner.baleen.annotation.DefaultValue
+import com.shoprunner.baleen.annotation.DefaultValueType
 import com.shoprunner.baleen.types.AllowsNull
 import com.shoprunner.baleen.types.BooleanType
 import com.shoprunner.baleen.types.CoercibleType
@@ -190,15 +191,79 @@ object DataClassGenerator {
             }
         }
 
-    internal fun ParameterSpec.Builder.addAliasAnnotation(aliases: Array<String>): ParameterSpec.Builder =
+    internal fun AnnotationSpec.Builder.addDefaultValueAnnotation(baleenType: BaleenType, defaultValue: Any?, options: Options): AnnotationSpec.Builder =
         this.apply {
-            if (aliases.isNotEmpty()) {
-                val aliasAnnotation = AnnotationSpec.builder(Alias::class)
-                aliases.forEach {
-                    aliasAnnotation.addMember(CodeBlock.of("%S", it))
+            when (defaultValue) {
+                NoDefault -> {
+                    // Do nothing
                 }
+                null -> addMember(CodeBlock.of("type = %T.Null", DefaultValueType::class))
+                else ->
+                    when (baleenType) {
+                        is IntegerType -> {
+                            addMember(CodeBlock.of("type = %T.BigInteger", DefaultValueType::class))
+                            addMember(CodeBlock.of("defaultStringValue = \"%L\"", defaultValue))
+                        }
+                        is NumericType -> {
+                            addMember(CodeBlock.of("type = %T.BigDecimal", DefaultValueType::class))
+                            addMember(CodeBlock.of("defaultStringValue = \"%L\"", defaultValue))
+                        }
+                        is OccurrencesType -> if (defaultValue is Iterable<*>) {
+                            addMember(CodeBlock.of("type = %T.EmptyList", DefaultValueType::class))
+                            addMember(CodeBlock.of("defaultElementClass = %T::class", baleenType.memberType.asTypeName(options)))
+                        }
+                        is MapType -> if (defaultValue is Map<*, *>) {
+                            addMember(CodeBlock.of("type = %T.EmptyMap", DefaultValueType::class))
+                            addMember(CodeBlock.of("defaultKeyClass = %T::class", baleenType.keyType.asTypeName(options)))
+                            addMember(CodeBlock.of("defaultElementClass = %T::class", baleenType.valueType.asTypeName(options)))
+                        }
+                        else ->
+                            when (defaultValue) {
+                                is String -> {
+                                    addMember(CodeBlock.of("type = %T.String", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultStringValue = %S", defaultValue))
+                                }
+                                is Boolean -> {
+                                    addMember(CodeBlock.of("type = %T.Boolean", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultBooleanValue = %L", defaultValue))
+                                }
+                                is Int -> {
+                                    addMember(CodeBlock.of("type = %T.Int", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultIntValue = %L", defaultValue))
+                                }
+                                is Long -> {
+                                    addMember(CodeBlock.of("type = %T.Boolean", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultLongValue = %LL", defaultValue))
+                                }
+                                is Float -> {
+                                    addMember(CodeBlock.of("type = %T.Float", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultFloatValue = %Lf", defaultValue))
+                                }
+                                is Double -> {
+                                    addMember(CodeBlock.of("type = %T.Double", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultDoubleValue = %L", defaultValue))
+                                }
+                                is Enum<*> -> {
+                                    addMember(CodeBlock.of("type = %T.String", DefaultValueType::class))
+                                    addMember(CodeBlock.of("defaultStringValue = %S", defaultValue.name))
+                                }
+                            }
+                    }
+            }
+        }
 
-                addAnnotation(aliasAnnotation.build())
+    internal fun ParameterSpec.Builder.addDefaultValueAnnotation(baleenType: BaleenType, defaultValue: Any?, options: Options): ParameterSpec.Builder =
+        this.apply {
+            if (defaultValue != NoDefault) {
+                if (defaultValue != null) {
+                    addAnnotation(
+                        AnnotationSpec.builder(DefaultValue::class)
+                            .addDefaultValueAnnotation(baleenType, defaultValue, options)
+                            .build()
+                    )
+                } else {
+                    addAnnotation(ClassName("com.shoprunner.baleen.annotation", "DefaultNull"))
+                }
             }
         }
 
@@ -206,7 +271,7 @@ object DataClassGenerator {
         val typeName = attr.type.asTypeName(options)
         return addParameter(
             ParameterSpec.builder(attr.name, typeName)
-                .addAliasAnnotation(attr.aliases)
+                .addDefaultValueAnnotation(attr.type, attr.default, options)
                 .defaultValue(attr.type, attr.default)
                 .build()
         )

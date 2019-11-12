@@ -649,6 +649,8 @@ internal class DataClassGeneratorForNestedModelsTest {
             package com.shoprunner.baleen.kotlin.test
 
             import com.shoprunner.baleen.annotation.DataDescription
+            import com.shoprunner.baleen.annotation.DefaultValue
+            import com.shoprunner.baleen.annotation.DefaultValueType
             import kotlin.String
             
             /**
@@ -659,6 +661,10 @@ internal class DataClassGeneratorForNestedModelsTest {
               /**
                * Test field
                */
+              @DefaultValue(
+                type = DefaultValueType.String,
+                defaultStringValue = "Hello"
+              )
               val field: String = "Hello"
             )
 
@@ -668,12 +674,18 @@ internal class DataClassGeneratorForNestedModelsTest {
             package com.shoprunner.baleen.kotlin.test
 
             import com.shoprunner.baleen.annotation.DataDescription
+            import com.shoprunner.baleen.annotation.DefaultValue
+            import com.shoprunner.baleen.annotation.DefaultValueType
             
             /**
              * Test Parent
              */
             @DataDescription
             data class Parent(
+              @DefaultValue(
+                type = DefaultValueType.String,
+                defaultStringValue = "hmmm this works but won't compile"
+              )
               val child: Child = "hmmm this works but won't compile"
             )
 
@@ -717,6 +729,7 @@ internal class DataClassGeneratorForNestedModelsTest {
             package com.shoprunner.baleen.kotlin.test
 
             import com.shoprunner.baleen.annotation.DataDescription
+            import com.shoprunner.baleen.annotation.DefaultNull
             import kotlin.String
             
             /**
@@ -727,6 +740,7 @@ internal class DataClassGeneratorForNestedModelsTest {
               /**
                * Test field
                */
+              @DefaultNull
               val field: String? = null
             )
 
@@ -736,12 +750,14 @@ internal class DataClassGeneratorForNestedModelsTest {
             package com.shoprunner.baleen.kotlin.test
 
             import com.shoprunner.baleen.annotation.DataDescription
+            import com.shoprunner.baleen.annotation.DefaultNull
             
             /**
              * Test Parent
              */
             @DataDescription
             data class Parent(
+              @DefaultNull
               val child: Child? = null
             )
 

@@ -29,7 +29,7 @@ annotation class DefaultValue(
     /**
      * Required. Tells that annotation processor type of default value to generate.
      */
-    val type: DefaultValueType,
+    val type: DefaultValueType = DefaultValueType.Null,
 
     /**
      * Used when `type = String`. Defaults to "".
@@ -216,3 +216,9 @@ annotation class DefaultValue(
 enum class DefaultValueType {
     Null, Boolean, String, Int, Long, BigInteger, Float, Double, BigDecimal, DataClass, EmptyArray, EmptyList, EmptySet, EmptyMap
 }
+
+/**
+ * Simplify Null defaults with its own annotation for readability sake.
+ * Syntactically equivalent of @DefaultValue(type = DefaultValueType.Null)
+ */
+typealias DefaultNull = DefaultValue

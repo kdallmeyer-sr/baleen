@@ -787,6 +787,8 @@ internal class DataClassGeneratorForSimpleModelsTest {
             package com.shoprunner.baleen.kotlin.test
 
             import com.shoprunner.baleen.annotation.DataDescription
+            import com.shoprunner.baleen.annotation.DefaultValue
+            import com.shoprunner.baleen.annotation.DefaultValueType
             import kotlin.String
             
             /**
@@ -797,6 +799,10 @@ internal class DataClassGeneratorForSimpleModelsTest {
               /**
                * Test field
                */
+              @DefaultValue(
+                type = DefaultValueType.String,
+                defaultStringValue = "Hello"
+              )
               val field: String = "Hello"
             )
 
@@ -829,6 +835,7 @@ internal class DataClassGeneratorForSimpleModelsTest {
             package com.shoprunner.baleen.kotlin.test
 
             import com.shoprunner.baleen.annotation.DataDescription
+            import com.shoprunner.baleen.annotation.DefaultNull
             import kotlin.String
             
             /**
@@ -839,6 +846,7 @@ internal class DataClassGeneratorForSimpleModelsTest {
               /**
                * Test field
                */
+              @DefaultNull
               val field: String? = null
             )
 
