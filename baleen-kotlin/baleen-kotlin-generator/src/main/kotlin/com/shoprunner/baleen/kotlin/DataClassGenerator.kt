@@ -4,6 +4,7 @@ import com.shoprunner.baleen.AttributeDescription
 import com.shoprunner.baleen.BaleenType
 import com.shoprunner.baleen.DataDescription
 import com.shoprunner.baleen.NoDefault
+import com.shoprunner.baleen.annotation.Alias
 import com.shoprunner.baleen.annotation.DefaultValue
 import com.shoprunner.baleen.annotation.DefaultValueType
 import com.shoprunner.baleen.types.AllowsNull
@@ -191,6 +192,18 @@ object DataClassGenerator {
             }
         }
 
+    internal fun ParameterSpec.Builder.addAliasAnnotation(aliases: Array<String>): ParameterSpec.Builder =
+        this.apply {
+            if (aliases.isNotEmpty()) {
+                val aliasAnnotation = AnnotationSpec.builder(Alias::class)
+                aliases.forEach {
+                    aliasAnnotation.addMember(CodeBlock.of("%S", it))
+                }
+
+                addAnnotation(aliasAnnotation.build())
+            }
+        }
+
     internal fun AnnotationSpec.Builder.addDefaultValueAnnotation(baleenType: BaleenType, defaultValue: Any?, options: Options): AnnotationSpec.Builder =
         this.apply {
             when (defaultValue) {
@@ -271,6 +284,7 @@ object DataClassGenerator {
         val typeName = attr.type.asTypeName(options)
         return addParameter(
             ParameterSpec.builder(attr.name, typeName)
+                .addAliasAnnotation(attr.aliases)
                 .addDefaultValueAnnotation(attr.type, attr.default, options)
                 .defaultValue(attr.type, attr.default)
                 .build()
