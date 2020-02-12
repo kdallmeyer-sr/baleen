@@ -26,7 +26,7 @@ import com.shoprunner.baleen.types.UnionType
 import java.io.File
 import java.nio.file.Path
 
-object JsonSchemaGenerator : BaseGenerator<JsonSchema, JsonSchemaOptions> {
+object JsonSchemaGenerator : BaseGenerator<BaleenType, JsonSchema, JsonSchemaOptions> {
     private fun DataDescription.getId(): String =
         if (this.nameSpace.isNotBlank()) "${this.nameSpace}.${this.name}" else this.name
 
@@ -69,14 +69,14 @@ object JsonSchemaGenerator : BaseGenerator<JsonSchema, JsonSchemaOptions> {
 
     override fun defaultTypeMapper(
         typeMapper: JsonSchemaTypeMapper,
-        baleenType: BaleenType,
+        source: BaleenType,
         options: JsonSchemaOptions
     ): JsonSchema {
-        return when (baleenType) {
+        return when (source) {
             is DataDescription ->
-                baleenType.encodeObjectSchema(typeMapper, options)
+                source.encodeObjectSchema(typeMapper, options)
             is AllowsNull<*> -> {
-                val subSchema = typeMapper(baleenType.type, options)
+                val subSchema = typeMapper(source.type, options)
                 if (subSchema is OneOf) {
                     OneOf(listOf(NullSchema()) + subSchema.oneOf)
                 } else {
@@ -84,56 +84,56 @@ object JsonSchemaGenerator : BaseGenerator<JsonSchema, JsonSchemaOptions> {
                 }
             }
             is BooleanType -> BooleanSchema
-            is CoercibleType<*, *> -> typeMapper(baleenType.toSubType(options.coercibleHandlerOption), options)
+            is CoercibleType<*, *> -> typeMapper(source.toSubType(options.coercibleHandlerOption), options)
             is DoubleType -> NumberSchema(
-                maximum = baleenType.max.takeIf { it.isFinite() }?.toBigDecimal(),
-                minimum = baleenType.min.takeIf { it.isFinite() }?.toBigDecimal()
+                maximum = source.max.takeIf { it.isFinite() }?.toBigDecimal(),
+                minimum = source.min.takeIf { it.isFinite() }?.toBigDecimal()
             )
             is IntType -> IntegerSchema(
-                maximum = baleenType.max.toBigInteger(),
-                minimum = baleenType.min.toBigInteger()
+                maximum = source.max.toBigInteger(),
+                minimum = source.min.toBigInteger()
             )
             is IntegerType -> IntegerSchema(
-                maximum = baleenType.max,
-                minimum = baleenType.min
+                maximum = source.max,
+                minimum = source.min
             )
             is EnumType -> StringSchema(
-                enum = baleenType.enum
+                enum = source.enum
             )
             is MapType -> {
-                if (baleenType.keyType !is StringType) {
+                if (source.keyType !is StringType) {
                     throw Exception("Map keys can only be String")
                 }
-                val subSchema = typeMapper(baleenType.valueType, options).asObjectReferenceOrSelf()
+                val subSchema = typeMapper(source.valueType, options).asObjectReferenceOrSelf()
                 MapSchema(additionalProperties = subSchema)
             }
             is FloatType -> NumberSchema(
-                maximum = baleenType.max.takeIf { it.isFinite() }?.toBigDecimal(),
-                minimum = baleenType.min.takeIf { it.isFinite() }?.toBigDecimal()
+                maximum = source.max.takeIf { it.isFinite() }?.toBigDecimal(),
+                minimum = source.min.takeIf { it.isFinite() }?.toBigDecimal()
             )
             is InstantType -> DateTimeSchema()
             is LongType -> IntegerSchema(
-                maximum = baleenType.max.toBigInteger(),
-                minimum = baleenType.min.toBigInteger()
+                maximum = source.max.toBigInteger(),
+                minimum = source.min.toBigInteger()
             )
             is NumericType -> NumberSchema(
-                maximum = baleenType.max,
-                minimum = baleenType.min
+                maximum = source.max,
+                minimum = source.min
             )
             is OccurrencesType -> {
-                val subSchema = typeMapper(baleenType.memberType, options).asObjectReferenceOrSelf()
+                val subSchema = typeMapper(source.memberType, options).asObjectReferenceOrSelf()
                 ArraySchema(items = subSchema)
             }
             is StringType -> StringSchema(
-                maxLength = baleenType.max,
-                minLength = baleenType.min
+                maxLength = source.max,
+                minLength = source.min
             )
             is StringConstantType -> StringSchema(
-                enum = listOf(baleenType.constant)
+                enum = listOf(source.constant)
             )
             is TimestampMillisType -> DateTimeSchema()
             is UnionType -> {
-                val subSchemas = baleenType.types
+                val subSchemas = source.types
                     .map { typeMapper(it, options).asObjectReferenceOrSelf() }
                     .distinct()
 
@@ -143,7 +143,7 @@ object JsonSchemaGenerator : BaseGenerator<JsonSchema, JsonSchemaOptions> {
                     OneOf(subSchemas)
                 }
             }
-            else -> throw Exception("No mapping is defined for ${baleenType.name()} to JsonSchema")
+            else -> throw Exception("No mapping is defined for ${source.name()} to JsonSchema")
         }
     }
 

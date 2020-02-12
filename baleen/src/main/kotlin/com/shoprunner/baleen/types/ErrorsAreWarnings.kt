@@ -16,3 +16,4 @@ class ErrorsAreWarnings<out T : BaleenType>(val type: T) : BaleenType {
                 }
             }
 }
+

@@ -8,42 +8,42 @@ import com.shoprunner.baleen.types.MapType
 import com.shoprunner.baleen.types.OccurrencesType
 import com.shoprunner.baleen.types.UnionType
 
-internal object StringGenerator : BaseGenerator<String, StringOptions> {
+internal object StringGenerator : BaseGenerator<BaleenType, String, StringOptions> {
     override fun defaultTypeMapper(
-        typeMapper: TypeMapper<String, StringOptions>,
-        baleenType: BaleenType,
+        typeMapper: TypeMapper<BaleenType, String, StringOptions>,
+        source: BaleenType,
         options: StringOptions
     ): String =
-        when (baleenType) {
-            is AllowsNull<*> -> "AllowsNull(${typeMapper(baleenType.type, options)})"
+        when (source) {
+            is AllowsNull<*> -> "AllowsNull(${typeMapper(source.type, options)})"
             is CoercibleType<*, *> -> {
-                val subType = baleenType.toSubType(options.coercibleHandlerOption)
+                val subType = source.toSubType(options.coercibleHandlerOption)
                 val mapped = typeMapper(subType, options)
                 when (options.coercibleHandlerOption) {
                     CoercibleHandlerOption.FROM -> "CoercibleFrom($mapped)"
                     CoercibleHandlerOption.TO -> "CoercibleTo($mapped)"
                 }
             }
-            is OccurrencesType -> "Occurrences(${typeMapper(baleenType.memberType, options)})"
+            is OccurrencesType -> "Occurrences(${typeMapper(source.memberType, options)})"
             is MapType -> {
-                val key = typeMapper(baleenType.valueType, options)
-                val value = typeMapper(baleenType.valueType, options)
+                val key = typeMapper(source.valueType, options)
+                val value = typeMapper(source.valueType, options)
                 "Map($key, $value)"
             }
             is UnionType -> {
-                baleenType.types
+                source.types
                     .map { typeMapper(it, options) }
                     .joinToString(", ", "Union(", ")")
             }
             is DataDescription -> {
                 val name =
-                    if (baleenType.nameSpace.isNotBlank()) "${baleenType.nameSpace}.${baleenType.name()}"
-                    else baleenType.name
-                val attrs = baleenType.attrs
+                    if (source.nameSpace.isNotBlank()) "${source.nameSpace}.${source.name()}"
+                    else source.name
+                val attrs = source.attrs
                     .map { "${it.name}=${typeMapper(it.type, options)}" }
                     .joinToString(", ")
                 "$name($attrs)"
             }
-            else -> baleenType.name()
+            else -> source.name()
         }
 }
