@@ -6,7 +6,7 @@ import java.time.format.DateTimeParseException
 
 class StringCoercibleToTimestamp(
     timestampType: TimestampMillisType,
-    dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
+    val dateTimeFormatter: DateTimeFormatter = DateTimeFormatter.ISO_LOCAL_DATE_TIME
 ) :
         StringCoercibleToType<TimestampMillisType>(timestampType, {
             try {
