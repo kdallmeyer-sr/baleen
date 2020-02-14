@@ -4,8 +4,10 @@ import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import com.shoprunner.baleen.Baleen
 import com.shoprunner.baleen.BaleenType
 import com.shoprunner.baleen.DataDescription
+import com.shoprunner.baleen.NoDefault
 import com.shoprunner.baleen.generator.BaseGenerator
 import com.shoprunner.baleen.generator.TypeMapper
+import com.shoprunner.baleen.poet.toFileSpec
 import com.shoprunner.baleen.types.AllowsNull
 import com.shoprunner.baleen.types.BooleanType
 import com.shoprunner.baleen.types.EnumType
@@ -28,6 +30,34 @@ object BaleenGenerator2 : BaseGenerator<JsonSchema, BaleenType, BaleenOptions> {
 
     private val mapper = jacksonObjectMapper()
 
+    fun getNamespaceAndName(schema: RootJsonSchema): Pair<String, String> {
+        // Try to use "self" if it exists
+        return if (schema.self != null) {
+            schema.self!!.vendor to schema.self!!.name
+        }
+        // Otherwise parse from "id" if it exists
+        else if (schema.id != null) {
+            getNamespaceAndName(schema.id!!)
+        }
+        // Finally get it from "$ref"
+        else if (schema.`$ref` != null) {
+            getNamespaceAndName(schema.`$ref`!!)
+        } else {
+            "" to "NoName"
+        }
+    }
+
+    fun getNamespaceAndName(record: String): Pair<String, String> {
+        val id = record.substringAfterLast("record:")
+        return if (id.contains(".")) {
+            val namespace = id.substringBeforeLast(".")
+            val name = id.substringAfterLast(".")
+            namespace to name
+        } else {
+            "" to id
+        }
+    }
+
     override fun defaultTypeMapper(
         typeMapper: TypeMapper<JsonSchema, BaleenType, BaleenOptions>,
         source: JsonSchema,
@@ -35,7 +65,7 @@ object BaleenGenerator2 : BaseGenerator<JsonSchema, BaleenType, BaleenOptions> {
     ): BaleenType {
         return when (source) {
             is AnyOf -> unionType(source.anyOf, typeMapper, options)
-            is ArraySchema -> OccurrencesType(typeMapper(source, options))
+            is ArraySchema -> OccurrencesType(typeMapper(source.items, options))
             is BooleanSchema -> BooleanType()
             is IntegerSchema -> IntegerType(source.minimum, source.maximum)
             is MapSchema -> MapType(StringType(), typeMapper(source.additionalProperties, options))
@@ -56,21 +86,14 @@ object BaleenGenerator2 : BaseGenerator<JsonSchema, BaleenType, BaleenOptions> {
                 source.format == StringFormats.`date-time` -> InstantType()
                 else -> StringType(source.minLength ?: 0, source.maxLength ?: Int.MAX_VALUE)
             }
-            is ObjectSchema -> mapObjectSchema(source,  typeMapper, options)
+            is ObjectSchema -> mapObjectSchema(source, typeMapper, options)
             else -> throw IllegalArgumentException("json type ${source::class.simpleName} not supported")
         }
     }
 
-    private fun String.toDataDescription(): DataDescription {
-        val ref = replaceFirst("#/definitions/", "")
-        val id = ref.replaceFirst("record:", "")
-        return if (id.contains(".")) {
-            val namespace = id.substringBeforeLast(".")
-            val name = id.substringAfterLast(".")
-            Baleen.describe(name, namespace)
-        } else {
-            Baleen.describe(id)
-        }
+    private fun String.toDataDescription(description: String? = ""): DataDescription {
+        val (namespace, name) = getNamespaceAndName(this)
+        return Baleen.describe(name, namespace, description ?: "")
     }
 
     private fun unionType(
@@ -88,30 +111,46 @@ object BaleenGenerator2 : BaseGenerator<JsonSchema, BaleenType, BaleenOptions> {
     }
 
     fun mapObjectSchema(objectSchema: ObjectSchema, typeMapper: TypeMapper<JsonSchema, BaleenType, BaleenOptions>, options: BaleenOptions): DataDescription {
-        val dataDescription = objectSchema.id!!.toDataDescription()
+        val dataDescription = objectSchema.id!!.toDataDescription(objectSchema.description)
         objectSchema.properties.forEach { attrName, attrSchema ->
             val isRequired = objectSchema.required?.contains(attrName) == true
             val attrType = typeMapper(attrSchema, options)
 
-            dataDescription.attr(attrName, attrType, required = isRequired)
+            val schemaDefault = attrSchema.default
+            val default = when (schemaDefault) {
+                null -> NoDefault
+                Null -> null
+                else -> schemaDefault
+            }
+
+            dataDescription.attr(attrName, attrType, attrSchema.description ?: "", required = isRequired, default = default)
         }
+        return dataDescription
     }
 
-    fun encode(schema: RootJsonSchema): List<FileSpec> {
-        return if (schema.definitions != null) {
-            schema.definitions!!.map { (record, objectSchema) ->
-                val (namespace, name) = BaleenGenerator.getNamespaceAndName(record)
-                encode(namespace, name, objectSchema)
+    fun encode(schema: RootJsonSchema, options: BaleenOptions = BaleenOptions(), typeMapper: TypeMapper<JsonSchema, BaleenType, BaleenOptions> = ::defaultTypeMapper): List<FileSpec> {
+        return when {
+            schema.definitions != null ->
+                schema.definitions!!.map { (record, objectSchema) ->
+                    val (namespace, name) = getNamespaceAndName(record)
+                    val fullObjectSchema = objectSchema.copy(id = "$namespace.$name")
+                        .withDescription(objectSchema.description)
+                        .withDefault(objectSchema.default)
+                    val dataDescription = typeMapper(fullObjectSchema, options)
+                    dataDescription.toFileSpec()
+                }
+            schema.type == JsonType.`object` -> {
+                val (namespace, name) = getNamespaceAndName(schema)
+                val objectSchema = ObjectSchema(
+                    schema.required,
+                    schema.additionalProperties,
+                    schema.properties ?: emptyMap(),
+                    "$namespace.$name"
+                )
+                val dataDescription = typeMapper(objectSchema, options)
+                listOf(dataDescription.toFileSpec())
             }
-        } else if (schema.type == JsonType.`object`) {
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
-            val objectSchema = ObjectSchema(
-                schema.required,
-                schema.additionalProperties,
-                schema.properties ?: emptyMap())
-            listOf(encode(namespace, name, objectSchema))
-        } else {
-            emptyList()
+            else -> emptyList()
         }
     }
 

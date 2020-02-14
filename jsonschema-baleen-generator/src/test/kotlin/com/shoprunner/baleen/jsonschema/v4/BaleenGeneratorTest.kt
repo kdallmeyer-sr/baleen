@@ -1,7 +1,7 @@
 package com.shoprunner.baleen.jsonschema.v4
 
 import com.shoprunner.baleen.DataDescription
-import com.shoprunner.baleen.jsonschema.v4.BaleenGenerator.parseJsonSchema
+import com.shoprunner.baleen.jsonschema.v4.BaleenGenerator2.parseJsonSchema
 import java.io.File
 import java.io.StringWriter
 import java.net.URL
@@ -28,7 +28,7 @@ internal class BaleenGeneratorTest {
         fun `#getNamepaceAndName parses namespace and name from "id"`() {
             val schema = RootJsonSchema("com.shoprunner.data.Dog", emptyMap(), "", "")
 
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName(schema)
 
             Assertions.assertThat(namespace).isEqualTo("com.shoprunner.data")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -38,7 +38,7 @@ internal class BaleenGeneratorTest {
         fun `#getNamepaceAndName parses name without namespace from "id"`() {
             val schema = RootJsonSchema("Dog", emptyMap(), "", "")
 
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName(schema)
 
             Assertions.assertThat(namespace).isEqualTo("")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -52,7 +52,7 @@ internal class BaleenGeneratorTest {
                     "0-0-0"
             ))
 
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName(schema)
 
             Assertions.assertThat(namespace).isEqualTo("com.shoprunner.data")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -62,7 +62,7 @@ internal class BaleenGeneratorTest {
         fun `#getNamepaceAndName parses name and namespace from "$ref"`() {
             val schema = RootJsonSchema(null, emptyMap(), "#/definitions/record:com.shoprunner.data.Dog", "")
 
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName(schema)
 
             Assertions.assertThat(namespace).isEqualTo("com.shoprunner.data")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -72,7 +72,7 @@ internal class BaleenGeneratorTest {
         fun `#getNamepaceAndName parses name without namespace from "$ref"`() {
             val schema = RootJsonSchema(null, emptyMap(), "#/definitions/record:Dog", "")
 
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName(schema)
 
             Assertions.assertThat(namespace).isEqualTo("")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -82,7 +82,7 @@ internal class BaleenGeneratorTest {
         fun `#getNamepaceAndName parses name without any information`() {
             val schema = RootJsonSchema(null, emptyMap(), null, "")
 
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName(schema)
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName(schema)
 
             Assertions.assertThat(namespace).isEqualTo("")
             Assertions.assertThat(name).isEqualTo("NoName")
@@ -90,7 +90,7 @@ internal class BaleenGeneratorTest {
 
         @Test
         fun `#getNamepaceAndName parses name and namespace from record`() {
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName("#/definitions/record:com.shoprunner.data.Dog")
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName("#/definitions/record:com.shoprunner.data.Dog")
 
             Assertions.assertThat(namespace).isEqualTo("com.shoprunner.data")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -98,7 +98,7 @@ internal class BaleenGeneratorTest {
 
         @Test
         fun `#getNamepaceAndName parses name without namespace from record`() {
-            val (namespace, name) = BaleenGenerator.getNamespaceAndName("#/definitions/record:Dog")
+            val (namespace, name) = BaleenGenerator2.getNamespaceAndName("#/definitions/record:Dog")
 
             Assertions.assertThat(namespace).isEqualTo("")
             Assertions.assertThat(name).isEqualTo("Dog")
@@ -143,7 +143,7 @@ internal class BaleenGeneratorTest {
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -189,7 +189,7 @@ internal class BaleenGeneratorTest {
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -225,13 +225,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "number",
-                            type = NumericType()
+                            type = NumericType(min = null, max = null)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -269,13 +269,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "number",
-                            type = NumericType(min = 0.toBigDecimal(), max = 100.toBigDecimal())
+                            type = NumericType(min = "0".toBigDecimal(), max = "100".toBigDecimal())
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -312,14 +312,14 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "number",
-                            type = NumericType(),
-                            default = 1.1
+                            type = NumericType(min = null, max = null),
+                            default = "1.1".toBigDecimal()
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -355,13 +355,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "numLegs",
-                            type = IntegerType()
+                            type = IntegerType(min = null, max = null)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -399,13 +399,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "numLegs",
-                            type = IntegerType(min = 0.toBigInteger(), max = 100.toBigInteger())
+                            type = IntegerType(min = "0".toBigInteger(), max = "100".toBigInteger())
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -442,14 +442,14 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "numLegs",
-                            type = IntegerType(),
-                            default = 10L
+                            type = IntegerType(min = null, max = null),
+                            default = "10".toBigInteger()
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -485,13 +485,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "name",
-                            type = StringType()
+                            type = StringType(min = 0, max = Int.MAX_VALUE)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -528,14 +528,14 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "name",
-                            type = StringType(),
+                            type = StringType(min = 0, max = Int.MAX_VALUE),
                             default = "Hello"
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -573,13 +573,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "name",
-                            type = StringType(5, 20)
+                            type = StringType(min = 5, max = 20)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -622,7 +622,7 @@ internal class BaleenGeneratorTest {
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -665,7 +665,7 @@ internal class BaleenGeneratorTest {
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -698,17 +698,18 @@ internal class BaleenGeneratorTest {
                 import com.shoprunner.baleen.Baleen.describe
                 import com.shoprunner.baleen.DataDescription
                 import com.shoprunner.baleen.types.InstantType
+                import java.time.Instant
 
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "birthday",
-                            type = InstantType()
+                            type = InstantType(before = Instant.MAX, after = Instant.MIN)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -745,13 +746,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "email",
-                            type = StringType()
+                            type = StringType(min = 0, max = Int.MAX_VALUE)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -793,13 +794,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "favorite_items",
-                            type = OccurrencesType(StringType())
+                            type = OccurrencesType(StringType(min = 0, max = Int.MAX_VALUE))
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -841,13 +842,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "favorite_items",
-                            type = MapType(StringType(), StringType())
+                            type = MapType(StringType(min = 0, max = Int.MAX_VALUE),StringType(min = 0, max = Int.MAX_VALUE))
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -892,13 +893,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "num_legs",
-                            type = UnionType(StringType(), IntegerType())
+                            type = UnionType(StringType(min = 0, max = Int.MAX_VALUE), IntegerType(min = null, max = null))
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -943,13 +944,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "num_legs",
-                            type = UnionType(StringType(), IntegerType())
+                            type = UnionType(StringType(min = 0, max = Int.MAX_VALUE), IntegerType(min = null, max = null))
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -985,7 +986,7 @@ internal class BaleenGeneratorTest {
             }""".trimIndent()
 
             Assertions
-                    .assertThatThrownBy { BaleenGenerator.encode(schemaStr.parseJsonSchema()) }
+                    .assertThatThrownBy { BaleenGenerator2.encode(schemaStr.parseJsonSchema()) }
                     .isInstanceOf(IllegalArgumentException::class.java)
                     .hasMessageContaining("json type AllOf not supported")
         }
@@ -1013,7 +1014,7 @@ internal class BaleenGeneratorTest {
             }""".trimIndent()
 
             Assertions
-                    .assertThatThrownBy { BaleenGenerator.encode(schemaStr.parseJsonSchema()) }
+                    .assertThatThrownBy { BaleenGenerator2.encode(schemaStr.parseJsonSchema()) }
                     .isInstanceOf(IllegalArgumentException::class.java)
                     .hasMessageContaining("json type Not not supported")
         }
@@ -1057,18 +1058,18 @@ internal class BaleenGeneratorTest {
                     it.attr(
                             name = "num_legs",
                             type = UnionType(
-                                IntegerType(), 
-                                IntegerType(
-                                    min = -9223372036854775808.toBigInteger(), 
-                                    max = 9223372036854775807.toBigInteger()
-                                )
+                                    IntegerType(min = null, max = null), 
+                                    IntegerType(
+                                        min = "-9223372036854775808".toBigInteger(), 
+                                        max = "9223372036854775807".toBigInteger()
+                                    )
                             )
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -1118,12 +1119,12 @@ internal class BaleenGeneratorTest {
                         name = "num_legs",
                         type = UnionType(
                             IntegerType(
-                                min = -2147483648.toBigInteger(), 
-                                max = 2147483647.toBigInteger()
+                                min = "-2147483648".toBigInteger(), 
+                                max = "2147483647".toBigInteger()
                             ), 
                             IntegerType(
-                                min = -9223372036854775808.toBigInteger(), 
-                                max = 9223372036854775807.toBigInteger()
+                                min = "-9223372036854775808".toBigInteger(), 
+                                max = "9223372036854775807".toBigInteger()
                             )
                         )
                     )
@@ -1131,7 +1132,7 @@ internal class BaleenGeneratorTest {
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -1171,13 +1172,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "num_legs",
-                            type = IntegerType()
+                            type = IntegerType(min = null, max = null)
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -1221,13 +1222,13 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "num_legs",
-                            type = AllowsNull(IntegerType())
+                            type = AllowsNull(IntegerType(min = null, max = null))
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -1272,14 +1273,14 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "", "") {
                     it.attr(
                             name = "num_legs",
-                            type = AllowsNull(IntegerType()),
+                            type = AllowsNull(IntegerType(min = null, max = null)),
                             default = null
                     )
                 }
             """.trimIndent()
 
             val outputStream = StringWriter()
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             descriptions.first().writeTo(outputStream)
             val outputStr = outputStream.toString()
 
@@ -1355,15 +1356,15 @@ internal class BaleenGeneratorTest {
                 val Dog: DataDescription = describe("Dog", "com.shoprunner.data.dogs", "It's a dog. Ruff Ruff!") {
                     it.attr(
                             name = "name",
-                            type = StringType(),
+                            type = StringType(min = 0, max = Int.MAX_VALUE),
                             markdownDescription = "The name of the dog",
                             required = true
                     )
                     it.attr(
                             name = "num_legs",
-                            type = IntegerType(),
+                            type = IntegerType(min = null, max = null),
                             markdownDescription = "The number of legs a dog has",
-                            default = 4L
+                            default = "4".toBigInteger()
                     )
                 }
             """.trimIndent()
@@ -1381,20 +1382,20 @@ internal class BaleenGeneratorTest {
                 val Pack: DataDescription = describe("Pack", "com.shoprunner.data.dogs", "It's a pack of Dogs!") {
                     it.attr(
                         name = "name",
-                        type = StringType(),
+                        type = StringType(min = 0, max = Int.MAX_VALUE),
                         markdownDescription = "The name of the pack",
                         required = true
                     )
                     it.attr(
                         name = "dogs",
-                        type = OccurrencesType(com.shoprunner.data.dogs.Dog),
+                        type = OccurrencesType(Dog),
                         markdownDescription = "The dogs in the pack",
                         required = true
                     )
                 }
             """.trimIndent()
 
-            val descriptions = BaleenGenerator.encode(schemaStr.parseJsonSchema())
+            val descriptions = BaleenGenerator2.encode(schemaStr.parseJsonSchema())
             val dogOutputStream = StringWriter()
             descriptions.first().writeTo(dogOutputStream)
             val dogOutputStr = dogOutputStream.toString()
@@ -1489,7 +1490,7 @@ internal class BaleenGeneratorTest {
             classesDir.mkdirs()
 
             // Generate Baleen Kotlin Files
-            BaleenGenerator.encode(schemaStr.parseJsonSchema()).forEach {
+            BaleenGenerator2.encode(schemaStr.parseJsonSchema()).forEach {
                 it.writeTo(sourceDir)
             }
 
@@ -1540,7 +1541,7 @@ internal class BaleenGeneratorTest {
                 // Generate Baleen Kotlin Files
                 val schemaUrl =
                     URL("https://raw.githubusercontent.com/snowplow/iglu-central/master/schemas/com.google.analytics/cookies/jsonschema/1-0-0")
-                BaleenGenerator.encode(schemaUrl.parseJsonSchema()).forEach {
+                BaleenGenerator2.encode(schemaUrl.parseJsonSchema()).forEach {
                     it.writeTo(sourceDir)
                 }
 
