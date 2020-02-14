@@ -1,4 +1,5 @@
 include 'baleen'
+include 'baleen-poet'
 include 'baleen-avro-generator'
 include 'baleen-base-schema-generator'
 include 'baleen-csv'
