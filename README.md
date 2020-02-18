@@ -94,10 +94,20 @@ val productDescription = "Product".describeAs {
     "department".type(StringType(min = 0, max = 100))
          .describe { attr ->
 
+        // Use entire data map for test
         attr.test { datatrace, value ->
             val department = value["department"]
             if (department != null && !departments.contains(department)) {
                 sequenceOf(ValidationError(dataTrace, "Department ($department) is not a valid value.", value))
+            } else {
+                sequenceOf()
+            }
+        }
+        
+        // Use just the attribute value
+        attr.test { (department, dataTrace) ->
+            if (department != null && !departments.contains(department)) {
+                sequenceOf(ValidationError(dataTrace, "Department ($department) is not a valid value.", department))
             } else {
                 sequenceOf()
             }

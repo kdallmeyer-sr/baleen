@@ -18,6 +18,11 @@ class DataTrace private constructor(
             stack = this.stack.plus(dataLocation),
             tags = this.tags)
 
+    operator fun plus(dataTrace: DataTrace) =
+        DataTrace(
+            stack = this.stack.plus(dataTrace.stack),
+            tags = this.tags.plus(dataTrace.tags))
+
     fun tag(key: String, value: String) =
         DataTrace(
             stack = this.stack,

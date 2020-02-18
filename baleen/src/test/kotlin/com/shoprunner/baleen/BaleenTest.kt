@@ -4,6 +4,7 @@ import com.shoprunner.baleen.Baleen.describeAs
 import com.shoprunner.baleen.TestHelper.dataOf
 import com.shoprunner.baleen.ValidationAssert.Companion.assertThat
 import com.shoprunner.baleen.types.AllowsNull
+import com.shoprunner.baleen.types.IntType
 import com.shoprunner.baleen.types.StringType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Nested
@@ -214,5 +215,37 @@ internal class BaleenTest {
         assertThat(dataDesc.validate(dataOf<String>())).isNotValid()
         assertThat(dataDesc.validate(dataOf("favorite number" to 42))).isValid()
         assertThat(dataDesc.validate(dataOf("favorite number" to 41))).isNotValid()
+    }
+
+    @Test
+    fun `custom attribute value test`() {
+        val dataDesc = "Guess".describeAs {
+            "favorite_number".type(IntType()).test { dataTrace, value ->
+                when (value["favorite_number"]) {
+                    42 -> emptySequence()
+                    else -> sequenceOf(ValidationError(dataTrace, "Wrong, guess again", value))
+                }
+            }
+        }
+
+        assertThat(dataDesc.validate(dataOf<String>())).isNotValid()
+        assertThat(dataDesc.validate(dataOf("favorite_number" to 42))).isValid()
+        assertThat(dataDesc.validate(dataOf("favorite_number" to 41))).isNotValid()
+    }
+
+    @Test
+    fun `custom attribute value bv attribute value test`() {
+        val dataDesc = "Guess".describeAs {
+            "favorite_number".type(IntType()).test { (value, dataTrace) ->
+                when (value) {
+                    42 -> emptySequence()
+                    else -> sequenceOf(ValidationError(dataTrace, "Wrong, guess again", value))
+                }
+            }
+        }
+
+        assertThat(dataDesc.validate(dataOf<String>())).isNotValid()
+        assertThat(dataDesc.validate(dataOf("favorite_number" to 42))).isValid()
+        assertThat(dataDesc.validate(dataOf("favorite_number" to 41))).isNotValid()
     }
 }
